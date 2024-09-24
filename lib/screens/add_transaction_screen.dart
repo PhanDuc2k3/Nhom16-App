@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
-class AddTransactionScreen extends StatelessWidget {
+class AddTransactionScreen extends StatefulWidget {
   final Function addTransaction;
 
   AddTransactionScreen(this.addTransaction);
 
+  @override
+  _AddTransactionScreenState createState() => _AddTransactionScreenState();
+}
+
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
+  bool isAddingMoney = true; // Mặc định là thêm tiền
 
   void submitData() {
     final title = titleController.text;
@@ -16,7 +22,9 @@ class AddTransactionScreen extends StatelessWidget {
       return;
     }
 
-    addTransaction(title, amount);
+    // Gọi hàm thêm giao dịch với số tiền âm nếu giảm tiền
+    widget.addTransaction(title, isAddingMoney ? amount : -amount);
+    Navigator.of(context).pop(); // Đóng màn hình sau khi thêm giao dịch
   }
 
   @override
@@ -29,15 +37,64 @@ class AddTransactionScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(labelText: 'Tiêu đề'),
+            // Hiển thị hai nút trong một hàng
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isAddingMoney = true; // Chọn thêm tiền
+                      });
+                    },
+                    child: Text('Thêm tiền'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isAddingMoney ? Colors.green : Colors.grey[300],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10), // Khoảng cách giữa hai nút
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isAddingMoney = false; // Chọn giảm tiền
+                      });
+                    },
+                    child: Text('Giảm tiền'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: !isAddingMoney ? Colors.red : Colors.grey[300],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            TextField(
-              controller: amountController,
-              decoration: InputDecoration(labelText: 'Số tiền'),
-              keyboardType: TextInputType.number,
-            ),
+            SizedBox(height: 20),
+            // Hiển thị nội dung cho thêm tiền
+            if (isAddingMoney) ...[
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Tiêu đề'),
+              ),
+              TextField(
+                controller: amountController,
+                decoration: InputDecoration(labelText: 'Số tiền'),
+                keyboardType: TextInputType.number,
+              ),
+            ] else ...[
+              // Hiển thị nội dung cho giảm tiền (nếu cần)
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Tiêu đề'),
+              ),
+              TextField(
+                controller: amountController,
+                decoration: InputDecoration(labelText: 'Số tiền'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: submitData,
               child: Text('Thêm Giao dịch'),
