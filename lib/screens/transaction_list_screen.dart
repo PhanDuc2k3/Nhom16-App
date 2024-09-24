@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import 'add_transaction_screen.dart';
+import 'account_screen.dart'; // Import màn hình tài khoản
 import '../widgets/transaction_item.dart';
 
 class TransactionListScreen extends StatefulWidget {
@@ -36,6 +37,12 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
   void _onItemTapped(int index) {
     if (index == 2) {
       _openAddTransactionScreen();
+    } else if (index == 4) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (ctx) => AccountScreen(), // Điều hướng đến màn hình tài khoản
+        ),
+      );
     } else {
       setState(() {
         _selectedIndex = index;
@@ -71,7 +78,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.analytics),
-            label: 'Phân tích',
+            label: 'Biểu đồ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
