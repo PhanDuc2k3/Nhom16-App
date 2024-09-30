@@ -42,7 +42,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
               userId: doc['userId'],
             );
           }));
-        });
+        }); 
       });
     }
   }
@@ -79,6 +79,52 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
     });
   }
 
+  void _deleteTransaction(String id) {
+    Firestore.FirebaseFirestore.instance
+        .collection('transactions')
+        .doc(id)
+        .delete(); // Xóa giao dịch từ Firestore
+
+    setState(() {
+      _transactions.removeWhere((tx) => tx.id == id); // Cập nhật danh sách
+    });
+  }
+
+  void _editTransaction(Transaction transaction) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return AddTransactionScreen(
+          (title, amount) {
+            Firestore.FirebaseFirestore.instance
+                .collection('transactions')
+                .doc(transaction.id)
+                .update({
+              'title': title,
+              'amount': amount,
+              'date': Firestore.Timestamp.now(),
+            });
+
+            setState(() {
+              // Cập nhật danh sách với giá trị mới
+              final index = _transactions.indexWhere((tx) => tx.id == transaction.id);
+              if (index >= 0) {
+                _transactions[index] = Transaction(
+                  id: transaction.id,
+                  title: title,
+                  amount: amount,
+                  date: DateTime.now(),
+                  userId: transaction.userId,
+                );
+              }
+            });
+          },
+          existingTransaction: transaction, // Truyền giao dịch hiện tại
+        );
+      },
+    );
+  }
+
   Widget _buildHomeScreen() {
     return Column(
       children: [
@@ -93,7 +139,11 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           child: ListView.builder(
             itemCount: _transactions.length,
             itemBuilder: (ctx, index) {
-              return TransactionItem(transaction: _transactions[index]);
+              return TransactionItem(
+                transaction: _transactions[index],
+                onDelete: _deleteTransaction, // Truyền hàm xóa
+                onEdit: _editTransaction, // Truyền hàm sửa
+              );
             },
           ),
         ),
