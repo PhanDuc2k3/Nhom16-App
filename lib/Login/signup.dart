@@ -1,40 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/transaction_list_screen.dart';
-import 'package:flutter_application_1/Login/signup.dart'; // Nhập SignUpScreen từ file signup.dart
-import 'package:flutter_application_1/Login/forgotPassword.dart'; // Nhập ForgotPasswordScreen từ file forgotPassword.dart
 
-class AuthGate extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasData) {
-          return TransactionListScreen();
-        } else {
-          return LoginScreen();
-        }
-      },
-    );
-  }
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class LoginScreen extends StatefulWidget {
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  Future<void> _login() async {
+  Future<void> _signUp() async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Kiểm tra mật khẩu và mật khẩu xác nhận
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mật khẩu và xác nhận mật khẩu không khớp.')),
+        );
+        return;
+      }
+
+      // Đăng ký người dùng mới với Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -46,17 +35,17 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      String errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+      String errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (e is FirebaseAuthException) {
         switch (e.code) {
-          case 'user-not-found':
-            errorMessage = 'Không tìm thấy người dùng với email này.';
-            break;
-          case 'wrong-password':
-            errorMessage = 'Mật khẩu không chính xác.';
+          case 'email-already-in-use':
+            errorMessage = 'Email này đã được sử dụng.';
             break;
           case 'invalid-email':
             errorMessage = 'Email không hợp lệ.';
+            break;
+          case 'weak-password':
+            errorMessage = 'Mật khẩu quá yếu.';
             break;
         }
       }
@@ -86,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Đăng nhập',
+                        'Đăng ký',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -116,11 +105,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         obscureText: true,
                       ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Xác nhận mật khẩu',
+                          prefixIcon: Icon(Icons.lock),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        obscureText: true,
+                      ),
                       const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _login,
+                          onPressed: _signUp,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -128,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           child: const Text(
-                            'Đăng nhập',
+                            'Đăng ký',
                             style: TextStyle(fontSize: 18),
                           ),
                         ),
@@ -138,32 +139,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ForgotPasswordScreen()), // Điều hướng đến màn hình quên mật khẩu
-                  );
-                },
-                child: const Text(
-                  'Quên mật khẩu?',
-                  style: TextStyle(color: Colors.blueAccent),
-                ),
-              ),
-              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Chưa có tài khoản?'),
+                  const Text('Đã có tài khoản?'),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUpScreen()), // Điều hướng tới trang đăng ký
-                      );
+                      Navigator.pop(context); // Quay về trang đăng nhập
                     },
                     child: const Text(
-                      'Đăng ký',
+                      'Đăng nhập',
                       style: TextStyle(color: Colors.blueAccent),
                     ),
                   ),
