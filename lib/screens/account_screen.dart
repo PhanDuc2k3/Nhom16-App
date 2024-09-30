@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http; // Import gói http
-import 'dart:convert'; // Để xử lý JSON
-import '../screens/account_detail_screen.dart'; // Import màn hình chi tiết tài khoản
+import '../screens/account_detail_screen.dart';
 import 'package:flutter_application_1/Login/auth_gate.dart';
-import 'package:flutter_application_1/widgets/profile_screen.dart'; // Đảm bảo đường dẫn đúng
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -18,29 +15,19 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchEmail(); // Gọi API để lấy email khi khởi tạo màn hình
+    _fetchEmail(); // Gọi hàm để lấy email khi khởi tạo màn hình
   }
 
-  // Hàm gọi API để lấy email
-  Future<void> _fetchEmail() async {
-    try {
-      // Ví dụ URL API, bạn thay bằng URL của server bạn
-      final response = await http.get(Uri.parse('https://api.example.com/user-email'));
-
-      if (response.statusCode == 200) {
-        // Parse JSON để lấy email từ API
-        final data = json.decode(response.body);
-        setState(() {
-          email = data['email'] ?? 'Không có email';
-        });
-      } else {
-        setState(() {
-          email = 'Lỗi khi lấy email';
-        });
-      }
-    } catch (e) {
+  // Hàm lấy email từ FirebaseAuth
+  void _fetchEmail() {
+    User? user = _auth.currentUser; // Lấy người dùng hiện tại
+    if (user != null) {
       setState(() {
-        email = 'Lỗi kết nối';
+        email = user.email ?? 'Không có email'; // Gán email nếu có
+      });
+    } else {
+      setState(() {
+        email = 'Không có email'; // Nếu không có người dùng
       });
     }
   }
@@ -48,9 +35,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tài khoản của bạn'),
-      ),
+     
       body: Center(
         child: Container(
           width: 300,
@@ -76,7 +61,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               SizedBox(height: 5),
-              Text(email), // Hiển thị email sau khi lấy từ API
+              Text(email), // Hiển thị email
               SizedBox(height: 20),
 
               // Danh sách tùy chọn tài khoản
