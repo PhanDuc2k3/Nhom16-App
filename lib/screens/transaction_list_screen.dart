@@ -15,7 +15,7 @@ class TransactionListScreen extends StatefulWidget {
 
 class _TransactionListScreenState extends State<TransactionListScreen> {
   final List<Transaction> _transactions = [];
-  bool _isLoading = true; // Trạng thái tải dữ liệu
+  bool _isLoading = true; // Thêm biến trạng thái tải dữ liệu
   int _selectedIndex = 0;
 
   @override
@@ -150,7 +150,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
   Widget _buildHomeScreen() {
     if (_isLoading) {
       return Center(
-        child: CircularProgressIndicator(), // Biểu tượng tải khi chưa có dữ liệu
+        child: CircularProgressIndicator(), // Hiển thị biểu tượng xoay khi đang tải
       );
     }
 
@@ -176,10 +176,45 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           child: ListView.builder(
             itemCount: _transactions.length,
             itemBuilder: (ctx, index) {
-              return TransactionItem(
-                transaction: _transactions[index],
-                onDelete: _deleteTransaction,
-                onEdit: _editTransaction,
+              final transaction = _transactions[index];
+              return Card( // Sử dụng Card để làm nổi bật
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            transaction.title,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            '${transaction.date.day}/${transaction.date.month}/${transaction.date.year}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '\$${transaction.amount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blueAccent, // Tô màu cho số tiền
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -230,7 +265,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
           children: <Widget>[
             _buildBottomNavigationItem(Icons.home, 'Trang chủ', 0),
             _buildBottomNavigationItem(Icons.calendar_today, 'Lịch', 1),
-            SizedBox(width: 36),
+            SizedBox(width: 36), // Khoảng trống giữa các nút điều hướng
             _buildBottomNavigationItem(Icons.analytics, 'Biểu đồ', 2),
             _buildBottomNavigationItem(Icons.account_circle, 'Tài khoản', 3),
           ],
