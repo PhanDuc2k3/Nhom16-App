@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AccountDetailScreen extends StatelessWidget {
   // Giả sử bạn có thông tin người dùng
   final String name = 'Phan Minh Duc';
-  final String dob = '01/01/2005'; // Ngày sinh
+  final String dob = '01/01/2003'; // Ngày sinh
   final String email = 'phanminhduc@gmail.com';
   final String address = '123 Đường ABC, Thành phố XYZ';
 

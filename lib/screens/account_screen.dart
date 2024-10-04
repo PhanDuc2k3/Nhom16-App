@@ -53,7 +53,7 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/img/imgcat.jpg'), // Đường dẫn đến ảnh avatar
+                backgroundImage: AssetImage('img/imgcat.jpg'), // Đường dẫn đến ảnh avatar
               ),
               SizedBox(height: 20),
               Text(
